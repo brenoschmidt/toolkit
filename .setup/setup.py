@@ -1,11 +1,12 @@
-
 import os
 import sys
 import subprocess
 
-VENV_DIR = ".venv"  # Hidden virtual environment
+SETUP_DIR = os.path.dirname(os.path.abspath(__file__))  # Path to .setup/
+PROJECT_DIR = os.path.abspath(os.path.join(SETUP_DIR, ".."))  # Root project folder
+VENV_DIR = os.path.join(PROJECT_DIR, ".venv")  # Hidden virtual environment path
 
-PYTHON_EXEC = sys.executable  # Detects correct Python version
+PYTHON_EXEC = sys.executable  # Detects current Python version
 
 def run_command(command):
     """Run a shell command and handle errors."""
@@ -30,7 +31,7 @@ def setup_virtualenv():
 
     print("✅ Virtual environment is set up.")
     print("🔄 Installing dependencies...")
-    run_command(f"{pip_exec} install -r requirements.txt")
+    run_command(f"{pip_exec} install -r {os.path.join(SETUP_DIR, 'requirements.txt')}")
 
     print("\n🚀 Setup complete! Activate the environment using:")
     print(f"  Windows: {activate_script}")
