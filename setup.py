@@ -3,8 +3,9 @@ import os
 import sys
 import subprocess
 
-VENV_DIR = "venv"
-PYTHON_EXEC = sys.executable  # Gets the correct Python interpreter
+VENV_DIR = ".venv"  # Hidden virtual environment
+
+PYTHON_EXEC = sys.executable  # Detects correct Python version
 
 def run_command(command):
     """Run a shell command and handle errors."""
@@ -16,10 +17,10 @@ def run_command(command):
 def setup_virtualenv():
     """Ensure the virtual environment is correctly set up."""
     if not os.path.exists(VENV_DIR):
-        print("🔧 Creating virtual environment...")
+        print("🔧 Creating virtual environment (.venv)...")
         run_command(f"{PYTHON_EXEC} -m venv {VENV_DIR}")
 
-    # Activate environment and install dependencies
+    # Determine paths for activation and pip
     if sys.platform == "win32":
         activate_script = os.path.join(VENV_DIR, "Scripts", "activate")
         pip_exec = os.path.join(VENV_DIR, "Scripts", "pip")
