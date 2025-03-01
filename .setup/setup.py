@@ -32,7 +32,7 @@ def setup_virtualenv():
     #pip install --upgrade --force-reinstall -r requirements.txt
     print("✅ Virtual environment is set up.")
     print("🔄 Installing dependencies...")
-    run_command(f"{pip_exec} install -r --upgrade {os.path.join(SETUP_DIR, 'requirements.txt')}")
+    run_command(f"{pip_exec} install  --upgrade -r {os.path.join(SETUP_DIR, 'requirements.txt')}")
 
     print("\n🚀 Setup complete! Activate the environment using:")
     print(f"  Windows: {activate_script}")
@@ -44,5 +44,6 @@ def main():
         return
     else:
         setup_virtualenv()
+
 if __name__ == "__main__":
-    main()
+    setup_virtualenv()
