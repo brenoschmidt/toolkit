@@ -1,4 +1,10 @@
 <project version="4">
+  <component name="ProjectRootManager">
+    <output url="file://$PROJECT_DIR$/out" />
+    <option name="project-jdk-name" value="$PROJECT_DIR$/.venv/bin/python" />
+    <option name="project-jdk-name" value="$PROJECT_DIR$/.venv/Scripts/python.exe" />
+    <option name="project-jdk-type" value="Python SDK" />
+  </component>
   <component name="PyCharmFileEditorManager">
     <option name="EXCLUDED_FOLDERS">
       <list>
