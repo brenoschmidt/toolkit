@@ -37,5 +37,11 @@ def setup_virtualenv():
     print(f"  Windows: {activate_script}")
     print(f"  macOS/Linux: source {activate_script}\n")
 
+def main():
+    if os.path.exists(os.path.join(VENV_DIR, "Scripts", "activate")) \
+            or os.path.exists(os.path.join(VENV_DIR, "bin", "activate")):
+        return
+    else:
+        setup_virtualenv()
 if __name__ == "__main__":
-    setup_virtualenv()
+    main()
