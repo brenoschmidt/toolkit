@@ -13,4 +13,8 @@
       </list>
     </option>
   </component>
+  <component name="VcsDirectoryMappings">
+    <mapping directory="$PROJECT_DIR$/.setup" vcs=""/>
+    <mapping directory="$PROJECT_DIR$/.venv" vcs=""/>
+  </component>
 </project>
