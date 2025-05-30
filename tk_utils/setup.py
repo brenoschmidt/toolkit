@@ -143,7 +143,7 @@ class Setup:
         if force_reinstall is True:
             opt = f"{opts} --force-reinstall"
         tgt = self.tk_utils_core_pkg
-        run_command(f"{self.pip_exec} install {opts} {tgt}"))
+        run_command(f"{self.pip_exec} install {opts} {tgt}")
 
 
     def update_tk_utils_core(self):
