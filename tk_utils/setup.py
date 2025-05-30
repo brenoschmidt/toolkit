@@ -76,8 +76,6 @@ class Setup:
     """
     """
 
-    def __init__():
-        check_locs()
 
 
     @cached_property
