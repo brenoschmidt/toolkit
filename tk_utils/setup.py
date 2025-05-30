@@ -5,13 +5,16 @@ Setup virtual environment in PyCharm and install required libs
 """
 from __future__ import annotations
 
-import tomllib
-import pathlib
-import os
-import sys
-import subprocess
-import textwrap
 from functools import cached_property
+import os
+import pathlib
+import requests
+import shutil
+import subprocess
+import sys
+import tempfile
+import textwrap
+import tomllib
 
 THIS_FILE = pathlib.Path(__file__)
 THIS_DIR = THIS_FILE.parent
@@ -34,9 +37,27 @@ def _mk_dirtree(
     |   |__ {THIS_FILE.name}      {setup_note}
     ''')
 
-
 def _as_path(pth: str | pathlib.Path):
     return pth if isinstance(pth, pathlib.Path) else pathlib.Path(pth)
+
+
+def download_to_tmp(url: str) -> pathlib.Path:
+    """
+    Request and download to a temporary file and return its location
+    """
+    try:
+        r = requests.get(url, timeout=10)
+        r.raise_for_status()
+
+        with tempfile.NamedTemporaryFile("w", 
+                                         encoding=r.encoding or "utf-8", 
+                                         delete=False) as f:
+            f.write(r.text)
+            tmp = pathlib.Path(f.name)
+        return tmp 
+    except Exception as e:
+        print(f"Download failed: {e}")
+
 
 def has_idea_folder(pth: pathlib.Path) -> bool:
     """
@@ -126,10 +147,11 @@ class Setup:
             print(f"Virtual env created")
 
     @cached_property
-    def tk_utils_core_pkg(self) -> str:
+    def tk_utils_core_url(self) -> str:
         """
         """
-        return "git+" + self.config['tk_utils_core']['github']
+        info = self.config['github']['tk_utils_core']
+        return f"https://github.com/{info['user']}/{info['repo']}.git"
 
 
     def install_tk_utils_core(
@@ -142,12 +164,32 @@ class Setup:
         opts = ''
         if force_reinstall is True:
             opt = f"{opts} --force-reinstall"
-        tgt = self.tk_utils_core_pkg
-        run_command(f"{self.pip_exec} install {opts} {tgt}")
+        tgt = self.tk_utils_core_url
+        run_command(f"{self.pip_exec} install {opts} git+{tgt}")
 
 
     def update_tk_utils_core(self):
         self.install_tk_utils_core(force_reinstall=True)
+
+
+    def update_tk_utils(self):
+        """
+        Updates this module
+        """
+        info = self.config['github']['toolkit']
+        base = f"https://raw.githubusercontent.com/{info['user']}/{info['repo']}"
+        root = f"{base}/main/tk_utils"
+        filenames = self.config['github']['toolkit']['tk_utils']['files']
+        for filename in filenames:
+            url = f"{root}/{filename}"
+            #tmp = download_to_tmp(url)
+            dst = THIS_DIR.joinpath(filename)
+            with open(tmp) as fsrc:
+                with open(dst, 'w') as fdst:
+                    fdst.write(fsrc.read())
+
+
+
 
 
 def main():
