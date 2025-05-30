@@ -1,0 +1,19 @@
+# ----------------------------------------------------------------------------
+#   Configuration file for the tk_utils module 
+# ----------------------------------------------------------------------------
+
+# This URL will be provided to you later in the course
+[dropbox]
+url="unset"
+
+# PLEASE DO NOT MODIFY 
+[dirnames]
+backup="_backup"
+dropbox="_dropbox"
+venv=".venv"
+
+
+# PLEASE DO NOT MODIFY 
+[tk_utils_core]
+github="https://github.com/brenoschmidt/tk_utils_core.git"
+
