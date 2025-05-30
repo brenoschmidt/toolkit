@@ -79,7 +79,7 @@ class Setup:
 
 
     @cached_property
-    def config() -> dict[str, Any]:
+    def config(self) -> dict[str, Any]:
         with open(CONFIG_TOML, "rb") as f:
             return tomllib.load(f)
 
@@ -126,6 +126,9 @@ class Setup:
         else:
             run_command(f"{sys.executable} -m venv {self.venv_dir}")
             print(f"Virtual env created")
+            print('--------------------------------')
+            print('PLEASE RESTART PYCHARM')
+            print('--------------------------------')
 
     def install_tk_utils_core(self):
         """
