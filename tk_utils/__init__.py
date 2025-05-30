@@ -31,6 +31,9 @@ from tk_utils.setup import (
 # from _backup or _dropbox
 check_locs()
 
+def update():
+    pass
+
 
 
 
