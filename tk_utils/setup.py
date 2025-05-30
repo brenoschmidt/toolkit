@@ -102,6 +102,7 @@ class Setup:
     def pip_exec(self) -> pathlib.Path:
         return self.venv_bin.joinpath('pip')
 
+    @cached_property
     def venv_exec(self) -> pathlib.Path:
         if POSIX is True:
             exec_name = 'python'
