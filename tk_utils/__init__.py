@@ -22,36 +22,15 @@ except ModuleNotFoundError as e:
             "   python tk_utils/setup.py"
             ) from e
 
-from tk_utils_core.core.structs import (
-        BaseConfig,
+from tk_utils.setup import (
+        Setup,
+        check_locs,
         )
 
-THIS_FILE = pathlib.Path(__file__)
-THIS_DIR = THIS_FILE.parent
+# Probably overkill but just in case students import this module
+# from _backup or _dropbox
+check_locs()
 
-
-def _as_path(pth: str | pathlib.Path):
-    return pth if isinstance(pth, pathlib.Path) else pathlib.Path(pth)
-
-
-def _load_config_toml() -> dict[str, Any]:
-    pth = pathlib.Path(__file__).joinpath('config.toml')
-    if not pth.exists():
-        raise FileNotFoundError(f"Cannot find config file:\n {pth}")
-    with open(pth, "rb") as f:
-        return tomllib.load(f)
-
-_config_toml = _load_config_toml()
-
-@dc.dataclass
-class Directories:
-    """
-    Directories
-    """
-    toolkit: pathlib.Path
-    backup: pathlib.Path
-    dropbox: pathlib.Path
-    venv: pathlib.Path
 
 
 

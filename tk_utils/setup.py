@@ -76,8 +76,6 @@ class Setup:
     """
     """
 
-
-
     @cached_property
     def config(self) -> dict[str, Any]:
         with open(CONFIG_TOML, "rb") as f:
@@ -126,19 +124,30 @@ class Setup:
         else:
             run_command(f"{sys.executable} -m venv {self.venv_dir}")
             print(f"Virtual env created")
-            print('--------------------------------')
-            print('PLEASE RESTART PYCHARM')
-            print('--------------------------------')
 
-    def install_tk_utils_core(self):
+    @cached_property
+    def tk_utils_core_pkg(self) -> str:
+        """
+        """
+        return "git+" + self.config['tk_utils_core']['github']
+
+
+    def install_tk_utils_core(
+            self,
+            force_reinstall: bool = False):
         """
         """
         if not self.pip_exec.exists():
             raise Exception(f"Cannot find pip executable inside venv")
+        opts = ''
+        if force_reinstall is True:
+            opt = f"{opts} --force-reinstall"
+        tgt = self.tk_utils_core_pkg
+        run_command(f"{self.pip_exec} install {opts} {tgt}"))
 
-        tgt = "git+" + self.config['tk_utils_core']['github']
-        run_command(f"{self.pip_exec} install {tgt}")
 
+    def update_tk_utils_core(self):
+        self.install_tk_utils_core(force_reinstall=True)
 
 
 def main():
@@ -148,7 +157,9 @@ def main():
     s = Setup()
     s.setup_venv()
     s.install_tk_utils_core()
-
+    print('--------------------------------')
+    print('PLEASE RESTART PYCHARM NOW')
+    print('--------------------------------')
 
 if __name__ == "__main__":
     main()
