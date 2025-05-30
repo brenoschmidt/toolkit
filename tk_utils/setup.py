@@ -76,9 +76,8 @@ class Setup:
     """
     """
 
-    def __init__(self, config: dict):
+    def __init__():
         check_locs()
-        self.config = config
 
 
     @cached_property
@@ -127,6 +126,7 @@ class Setup:
                 )
         else:
             run_command(f"{sys.executable} -m venv {self.venv_dir}")
+            print(f"Virtual env created
 
     def install_tk_utils_core(self):
         """
@@ -143,8 +143,7 @@ def main():
     """
     """
     check_locs()
-    config = _load_config()
-    s = Setup(config)
+    s = Setup()
     s.setup_venv()
     s.install_tk_utils_core()
 
