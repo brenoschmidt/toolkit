@@ -14,6 +14,17 @@ venv=".venv"
 
 
 # PLEASE DO NOT MODIFY 
-[tk_utils_core]
-github="https://github.com/brenoschmidt/tk_utils_core.git"
+[github]
+[github.tk_utils_core]
+user="brenoschmidt"
+repo="tk_utils_core"
+
+[github.toolkit]
+user="brenoschmidt"
+repo="toolkit"
+[github.toolkit.tk_utils]
+files=[
+    "__init__.py",
+    "setup.py",
+    ]
 
