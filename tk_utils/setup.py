@@ -127,7 +127,7 @@ class Setup:
                 )
         else:
             run_command(f"{sys.executable} -m venv {self.venv_dir}")
-            print(f"Virtual env created
+            print(f"Virtual env created")
 
     def install_tk_utils_core(self):
         """
