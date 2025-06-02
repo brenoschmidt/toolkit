@@ -1,30 +1,17 @@
 # ----------------------------------------------------------------------------
-#   Configuration file for the tk_utils module 
+#  Configuration file for the tk_utils module 
 # ----------------------------------------------------------------------------
 
 # This URL will be provided to you later in the course
 [dropbox]
-url="unset"
+url=""
 
 # PLEASE DO NOT MODIFY 
-[dirnames]
-backup="_backup"
-dropbox="_dropbox"
-venv=".venv"
-
+[pycharm]
+validate_paths=true
 
 # PLEASE DO NOT MODIFY 
 [github]
 [github.tk_utils_core]
 user="brenoschmidt"
 repo="tk_utils_core"
-
-[github.toolkit]
-user="brenoschmidt"
-repo="toolkit"
-[github.toolkit.tk_utils]
-files=[
-    "__init__.py",
-    "setup.py",
-    ]
-
