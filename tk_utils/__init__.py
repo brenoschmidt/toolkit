@@ -9,9 +9,7 @@ import tomllib
 import pathlib
 import os
 import sys
-import subprocess
 from functools import lru_cache
-import dataclasses as dc
 
 try:
     import tk_utils_core
@@ -22,23 +20,16 @@ except ModuleNotFoundError as e:
             "   python tk_utils/setup.py"
             ) from e
 
-from tk_utils.setup import (
-        Setup,
-        check_locs,
-        )
+from tk_utils_core import defaults as _dflts
+from tk_utils_core import *
 
-# Probably overkill but just in case students import this module
-# from _backup or _dropbox
-check_locs()
+CONFIG_TOML = pathlib.Path(__file__).parent.joinpath('config.toml')
 
-def update():
-    pass
+tk_defaults = _dflts.load_toml_defaults(CONFIG_TOML)
+_dflts.configure(tk_defaults)
 
-
-
-
-
-
+# Localize defaults
+defaults = _dflts.defaults
 
 
 
