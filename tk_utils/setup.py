@@ -17,8 +17,10 @@ from __future__ import annotations
 
 from functools import cached_property
 import os
+from types import SimpleNamespace
 import pathlib
 import subprocess
+import shutil
 import sys
 import textwrap
 import tomllib
@@ -78,66 +80,131 @@ def check_locs():
         ]
         raise FileNotFoundError('\n'.join(err))
 
-
-def run_command(command: str):
+def run(
+        cmd: list[str], 
+        shell: bool = False,
+        err_msg: str = '') -> subprocess.CompletedProcess:
     """
     Run a shell command and raise RuntimeError if it fails.
-    """
-    result = subprocess.run(command, shell=True)
-    if result.returncode != 0:
-        raise RuntimeError(f"Command failed: {command}")
 
+    Parameters
+    ----------
+    cmd : list of str
+        The command to run.
+    shell : bool, default False
+        If True, run command through the shell.
+    err_msg : str, default ''
+        Extra message to include if the command fails.
+
+    Returns
+    -------
+    subprocess.CompletedProcess
+        The result object with stdout, stderr, and returncode.
+    """
+    r = subprocess.run(
+        cmd,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        shell=shell,
+        text=True
+    )
+    if r.returncode != 0:
+        msg = f"Command failed: {' '.join(cmd)}"
+        if err_msg:
+            msg += f"\n{err_msg}"
+        msg += f"\n{r.stderr.strip()}"
+        raise RuntimeError(msg)
+    return r
+
+
+def create_venv(
+        env_dir: str | pathlib.Path,
+        force: bool = False) -> bool:
+    """
+    Create a new virtual environment in the given directory if it does not exist.
+
+    Parameters
+    ----------
+    env_dir : str | pathlib.Path
+        The path to the virtual environment directory.
+    force : bool, default False
+        If True, forcibly deletes an existing directory before creating a new venv.
+
+    Returns
+    -------
+    bool
+        True if the environment was created, False if it was already active.
+    """
+    env_dir = env_dir if isinstance(env_dir, pathlib.Path) else pathlib.Path(env_dir)
+    is_active = sys.prefix == str(env_dir.resolve())
+
+    if is_active:
+        print(f"Virtual environment already active: {env_dir}")
+        return False
+
+    pyvenv_cfg = env_dir / "pyvenv.cfg"
+    if env_dir.exists():
+        if pyvenv_cfg.exists():
+            if force:
+                print(f"Warning: Forcibly removing existing venv at {env_dir}")
+                shutil.rmtree(env_dir)
+            else:
+                raise FileExistsError(
+                    f"Directory '{env_dir}' contains a venv but it is not active.\n"
+                    "Try restarting your IDE, or use force=True to recreate it."
+                )
+        else:
+            raise FileExistsError(
+                f"Directory '{env_dir}' exists but does not contain a venv.\n"
+                "Use force=True to overwrite it."
+            )
+
+    print(f"Creating virtual environment at {env_dir}")
+    run(
+        [sys.executable, "-m", "venv", str(env_dir)],
+        err_msg=f"Failed to create virtual environment at {env_dir}"
+    )
+
+    print(f"Virtual environment created: {env_dir}")
+    return True
+
+
+def mk_venv_opts() -> SimpleNamespace:
+    """
+    """
+    venv_dir = PROJECT_ROOT.joinpath('.venv')
+    venv_bin = venv_dir.joinpath('bin' if POSIX else 'Scripts')
+    pip_exec = venv_bin.joinpath('pip')
+    pyexec = venv_bin.joinpath('python' if POSIX else 'python.exe')
+    return SimpleNamespace(
+            root=venv_dir,
+            bin=venv_bin,
+            pip=pip_exec,
+            pyexec=pyexec,
+            )
 
 class Setup:
     """
     Virtual environment and dependency setup utility.
     """
 
-    @cached_property
-    def config(self) -> dict[str, Any]:
+    def __init__(self):
+        self.config = mk_config()
+        self.venv = mk_venv_opts()
+
+
+    def mk_config(self) -> dict[str, Any]:
         """
         Load the configuration from `config.toml`.
         """
         with open(CONFIG_TOML, "rb") as f:
             return tomllib.load(f)
 
-    @cached_property
-    def venv_dir(self) -> pathlib.Path:
-        return PROJECT_ROOT.joinpath('.venv')
-
-    @cached_property
-    def venv_bin(self) -> pathlib.Path:
-        return self.venv_dir.joinpath('bin' if POSIX else 'Scripts')
-
-    @cached_property
-    def pip_exec(self) -> pathlib.Path:
-        return self.venv_bin.joinpath('pip')
-
-    @cached_property
-    def venv_exec(self) -> pathlib.Path:
-        return self.venv_bin.joinpath('python' if POSIX else 'python.exe')
-
-    def is_venv_activated(self) -> bool:
-        """
-        Check if the current Python interpreter is the one in the `.venv`.
-        """
-        return sys.prefix == str(self.venv_dir.resolve())
-
-    def setup_venv(self):
+    def setup_venv(self, force: bool = False):
         """
         Set up the `.venv/` directory if not already present and active.
         """
-        if self.is_venv_activated():
-            print("Virtual environment is setup and activated")
-        elif self.venv_dir.exists():
-            raise FileExistsError(
-                f"Directory {self.venv_dir.name} exists but venv is not active\n"
-                "Try restarting PyCharm\n"
-                "If the error persists, configure the PyCharm interpreter manually"
-            )
-        else:
-            run_command(f"{sys.executable} -m venv {self.venv_dir}")
-            print("Virtual env created")
+        return create_env(env_dir=self.venv.root, force=force)
 
     @cached_property
     def tk_utils_core_url(self) -> str:
@@ -152,12 +219,13 @@ class Setup:
         Install `tk_utils_core` into the virtual environment.
         If `force_reinstall` is True, reinstallation is forced.
         """
-        if not self.pip_exec.exists():
+        if not self.venv.pip.exists():
             raise FileNotFoundError("Cannot find pip executable inside venv")
 
         opts = "--force-reinstall" if force_reinstall else ""
         tgt = self.tk_utils_core_url
-        run_command(f"{self.pip_exec} install {opts} git+{tgt}")
+        run_command(f"{self.venv.pip} install {opts} git+{tgt}")
+
 
     def update_tk_utils_core(self):
         """
