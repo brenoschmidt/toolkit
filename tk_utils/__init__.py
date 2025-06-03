@@ -21,18 +21,26 @@ except ModuleNotFoundError as e:
             ) from e
 
 from tk_utils_core import defaults as _dflts
-from tk_utils_core import *
 
-CONFIG_TOML = pathlib.Path(__file__).parent.joinpath('config.toml')
+THIS_FILE = pathlib.Path(__file__)
+TK_UTILS_DIR = THIS_FILE.parent
+PRJ_DIR = TK_UTILS_DIR.parent
+CONFIG_TOML = TK_UTILS_DIR.joinpath('config.toml')
 
+# Update and localize defaults
 tk_defaults = _dflts.load_toml_defaults(CONFIG_TOML)
 _dflts.configure(tk_defaults)
-
-# Localize defaults
 defaults = _dflts.defaults
 
+# Path validator
+_tkpaths = tk_utils_core.pycharm.TKPaths(PRJ_DIR)
+_sysutils = tk_utils_core.pycharm.SysUtils(_tkpaths)
+
+# Localize
+sync_dbox = _sysutils.sync_dbox
+copy_new_files = _sysutils.copy_new_files
+backup = _sysutils.backup
 
 
-print(dir(sys.version))
 
 

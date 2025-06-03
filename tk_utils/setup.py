@@ -130,20 +130,24 @@ def create_venv(
     """
     Create a new virtual environment in the given directory if it does not exist.
 
+    This function checks whether the specified environment is:
+    - Already the active virtual environment (in which case, nothing is done).
+    - An existing directory with a valid venv (raises unless `force=True`).
+    - A non-existent path (creates a new virtual environment using `python -m venv`).
+
     Parameters
     ----------
     env_dir : str | pathlib.Path
         The path to the virtual environment directory.
-    force : bool, default False
-        If True, forcibly deletes an existing directory before creating a new venv.
 
-    Returns
-    -------
-    bool
-        True if the environment was created, False if it was already active.
+    force : bool, default False
+
+        If True, forcibly deletes an existing directory before creating a new
+        venv. Only if env_dir.name == '.venv'
+
     """
     env_dir = env_dir if isinstance(env_dir, pathlib.Path) else pathlib.Path(env_dir)
-    is_active = sys.prefix == str(env_dir.resolve())
+    is_active = sys.prefix == str(env_dir)
 
     if is_active:
         print(f"Virtual environment already active: {env_dir}")
@@ -151,15 +155,14 @@ def create_venv(
 
     pyvenv_cfg = env_dir / "pyvenv.cfg"
     if env_dir.exists():
-        if pyvenv_cfg.exists():
-            if force:
-                print(f"Warning: Forcibly removing existing venv at {env_dir}")
-                shutil.rmtree(env_dir)
-            else:
-                raise FileExistsError(
-                    f"Directory '{env_dir}' contains a venv but it is not active.\n"
-                    "Try restarting your IDE, or use force=True to recreate it."
-                )
+        if force and env_dir.name == '.venv':
+            print(f"Warning: Forcibly removing existing venv at {env_dir}")
+            shutil.rmtree(env_dir)
+        elif pyvenv_cfg.exists():
+            raise FileExistsError(
+                f"Directory '{env_dir}' contains a venv but it is not active.\n"
+                "Try restarting your IDE, or use force=True to recreate it."
+            )
         else:
             raise FileExistsError(
                 f"Directory '{env_dir}' exists but does not contain a venv.\n"
@@ -172,8 +175,12 @@ def create_venv(
         err_msg=f"Failed to create virtual environment at {env_dir}"
     )
 
-    print(f"Virtual environment created: {env_dir}")
+    print(f"[done] Virtual environment created: {env_dir}")
     return True
+
+
+
+
 
 
 def mk_venv_opts() -> SimpleNamespace:
@@ -247,7 +254,7 @@ def main():
     """
     check_locs()
     s = Setup()
-    s.setup_venv()
+    s.setup_venv(force=False)
     s.install_tk_utils_core()
     print('--------------------------------')
     print('PLEASE RESTART PYCHARM NOW')
