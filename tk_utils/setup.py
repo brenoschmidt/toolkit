@@ -6,6 +6,13 @@ ensures the existence of a `.idea/` folder and a `config.toml` file, then sets
 up a `.venv/` virtual environment and installs the `tk_utils_core` package
 from GitHub.
 
+toolkit/                        <- PyCharm project folder
+|__ tk_utils/     
+|   |__ __init__.py             
+|   |__ config.toml
+|   |__ setup.py                <- This file
+
+
 Usage
 -----
 Run this script directly inside a PyCharm-managed project:
