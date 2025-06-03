@@ -36,6 +36,9 @@ defaults = _dflts.defaults
 _tkpaths = tk_utils_core.pycharm.TKPaths(PRJ_DIR)
 _sysutils = tk_utils_core.pycharm.SysUtils(_tkpaths)
 
+if defaults.pycharm.validate_paths is True:
+    _tkpaths.validate_tk_utils_init()
+
 # Localize
 sync_dbox = _sysutils.sync_dbox
 copy_new_files = _sysutils.copy_new_files
