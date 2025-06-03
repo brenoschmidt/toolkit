@@ -38,6 +38,7 @@ _sysutils = tk_utils_core.pycharm.SysUtils(_tkpaths)
 
 if defaults.pycharm.validate_paths is True:
     _tkpaths.validate_tk_utils_init()
+    _tkpaths.validate_venv()
 
 # Localize
 sync_dbox = _sysutils.sync_dbox
