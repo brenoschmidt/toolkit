@@ -88,40 +88,79 @@ def check_locs():
         raise FileNotFoundError('\n'.join(err))
 
 def run(
-        cmd: list[str], 
-        shell: bool = False,
-        err_msg: str = '') -> subprocess.CompletedProcess:
+        cmd: list[str] | str,
+        shell: bool = True,
+        quiet: bool = False,
+        echo: bool = False,
+        bufsize: int = 0,
+        err_msg: str = '',
+        **kargs: Any) -> namedtuple:
     """
-    Run a shell command and raise RuntimeError if it fails.
+    Run a shell or subprocess command and capture output.
 
     Parameters
     ----------
-    cmd : list of str
-        The command to run.
-    shell : bool, default False
-        If True, run command through the shell.
+    cmd : list[str] | str
+        Command to run.
+
+    shell : bool, default True
+        If True, run the command via the shell.
+
+    quiet : bool, default False
+        If True, do not print stdout.
+
+    echo : bool, default False
+        If True, print the command being executed.
+
+    bufsize : int, default 0
+        Buffer size passed to subprocess.Popen.
+
     err_msg : str, default ''
         Extra message to include if the command fails.
 
+    **kargs : Any
+        Passed to subprocess.Popen.
+
     Returns
     -------
-    subprocess.CompletedProcess
-        The result object with stdout, stderr, and returncode.
+    Result
+        Named tuple with fields: cmd, stdout, stderr, rc (return code).
     """
-    r = subprocess.run(
-        cmd,
+    Result = namedtuple('Result', ['cmd', 'stdout', 'stderr', 'rc'])
+
+    cmd_list = cmd if isinstance(cmd, list) else shlex.split(cmd)
+    cmd_str = ' '.join(cmd_list) if shell else cmd_list
+
+    if echo:
+        print(f"Running: {cmd_str}")
+
+    proc = subprocess.Popen(
+        cmd_str,
+        shell=shell,
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
-        shell=shell,
-        text=True
+        bufsize=bufsize,
+        **kargs,
     )
-    if r.returncode != 0:
-        msg = f"Command failed: {' '.join(cmd)}"
+    out, err = proc.communicate()
+    rc = proc.returncode
+
+    out_str = out.decode('utf-8') if out else ''
+    err_str = err.decode('utf-8') if err else ''
+
+    if not quiet and out_str:
+        print(out_str)
+
+    if rc != 0:
+        msg = f"Command failed [{rc}]: {cmd_str}"
         if err_msg:
             msg += f"\n{err_msg}"
-        msg += f"\n{r.stderr.strip()}"
+        msg += f"\n{err_str.strip()}"
         raise RuntimeError(msg)
-    return r
+
+    return Result(cmd=cmd_str, stdout=out_str.splitlines(),
+                  stderr=err_str.splitlines(), rc=rc)
+
 
 
 def create_venv(
