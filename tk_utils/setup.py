@@ -23,6 +23,7 @@ Run this script directly inside a PyCharm-managed project:
 from __future__ import annotations
 
 from functools import cached_property
+from collections import namedtuple
 import os
 from types import SimpleNamespace
 import pathlib
