@@ -269,7 +269,7 @@ class Setup:
         info = self.config['github']['tk_utils_core']
         return f"https://github.com/{info['user']}/{info['repo']}.git"
 
-    def install_tk_utils_core(self, force_reinstall: bool = False):
+    def install_tk_utils_core(self, force_reinstall: bool = True):
         """
         Install `tk_utils_core` into the virtual environment.
         If `force_reinstall` is True, reinstallation is forced.
