@@ -26,6 +26,7 @@ from functools import cached_property
 from collections import namedtuple
 import os
 from types import SimpleNamespace
+import shlex
 import pathlib
 import subprocess
 import shutil
