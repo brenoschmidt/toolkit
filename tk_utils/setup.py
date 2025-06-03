@@ -218,7 +218,7 @@ class Setup:
         """
         Set up the `.venv/` directory if not already present and active.
         """
-        return create_env(env_dir=self.venv.root, force=force)
+        return create_venv(env_dir=self.venv.root, force=force)
 
     @cached_property
     def tk_utils_core_url(self) -> str:
