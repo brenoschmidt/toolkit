@@ -216,7 +216,7 @@ def create_venv(
         err_msg=f"Failed to create virtual environment at {env_dir}"
     )
 
-    print(f"[done] Virtual environment created: {env_dir}")
+    print(f"Virtual environment created: {env_dir}")
     return True
 
 

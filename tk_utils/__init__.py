@@ -40,6 +40,7 @@ _sysutils = tk_utils_core.pycharm.SysUtils(_tkpaths)
 sync_dbox = _sysutils.sync_dbox
 copy_new_files = _sysutils.copy_new_files
 backup = _sysutils.backup
+update = _sysutils.update_tk_utils
 
 
 
