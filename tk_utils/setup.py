@@ -238,7 +238,7 @@ class Setup:
 
         opts = "--force-reinstall" if force_reinstall else ""
         tgt = self.tk_utils_core_url
-        run_command(f"{self.venv.pip} install {opts} git+{tgt}")
+        run(f"{self.venv.pip} install {opts} git+{tgt}")
 
 
     def update_tk_utils_core(self):
