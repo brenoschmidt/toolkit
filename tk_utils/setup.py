@@ -203,7 +203,7 @@ class Setup:
     """
 
     def __init__(self):
-        self.config = mk_config()
+        self.config = self.mk_config()
         self.venv = mk_venv_opts()
 
 
