@@ -33,6 +33,6 @@ defaults = _dflts.defaults
 
 
 
-
+print(dir(sys.version))
 
 
