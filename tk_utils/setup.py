@@ -22,6 +22,7 @@ Run this script directly inside a PyCharm-managed project:
 """
 from __future__ import annotations
 
+import argparse
 from collections import namedtuple
 from functools import cached_property
 from types import SimpleNamespace
@@ -175,12 +176,18 @@ def create_venv(
         elif pyvenv_cfg.exists():
             raise FileExistsError(
                 f"Directory '{env_dir}' contains a venv but it is not active.\n"
-                "Try restarting your IDE, or use force=True to recreate it."
+                "To resolve this issue:\n"
+                "  1. Restart PyCharm\n"
+                "  2. If the problem persists, try running this script with --force:\n"
+                "     python tk_utils/setup.py --force"
             )
         else:
             raise FileExistsError(
                 f"Directory '{env_dir}' exists but does not contain a venv.\n"
-                "Use force=True to overwrite it."
+                "To resolve this issue:\n"
+                "  1. Restart PyCharm\n"
+                "  2. If the problem persists, try running this script with --force:\n"
+                "     python tk_utils/setup.py --force"
             )
 
     print(f"Creating virtual environment at {env_dir}")
@@ -276,18 +283,35 @@ class Setup:
         self.install_tk_utils_core(force_reinstall=True)
 
 
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(
+        description="Setup the virtual environment and install tk_utils_core."
+    )
+    parser.add_argument(
+        '--force',
+        action='store_true',
+        help='Force setup even if a venv already exists but is not active.'
+    )
+    return parser.parse_args()
+
+
+
+
 def main():
     """
     Entrypoint for setting up the virtual environment and installing deps.
     """
+    args = parse_args()
+
     check_locs()
     s = Setup()
-    s.setup_venv(force=False)
+    s.setup_venv(force=args.force)
     s.install_tk_utils_core()
+
     print('--------------------------------')
     print('PLEASE RESTART PYCHARM NOW')
     print('--------------------------------')
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()
