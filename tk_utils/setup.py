@@ -22,25 +22,24 @@ Run this script directly inside a PyCharm-managed project:
 """
 from __future__ import annotations
 
-from functools import cached_property
 from collections import namedtuple
-import os
+from functools import cached_property
 from types import SimpleNamespace
-import shlex
+from typing import Any, Sequence
+import os
 import pathlib
-import subprocess
+import shlex
 import shutil
+import subprocess
 import sys
 import textwrap
 import tomllib
-from typing import Any
 
 THIS_FILE = pathlib.Path(__file__)
 THIS_DIR = THIS_FILE.parent
 PROJECT_ROOT = THIS_DIR.parent
 CONFIG_TOML = THIS_DIR.joinpath('config.toml')
 POSIX = os.name == 'posix'
-
 
 
 
@@ -91,80 +90,52 @@ def check_locs():
         ]
         raise FileNotFoundError('\n'.join(err))
 
+
 def run(
-        cmd: list[str] | str,
-        shell: bool = True,
-        quiet: bool = False,
-        echo: bool = False,
-        bufsize: int = 0,
+        cmds: Sequence[str],
         err_msg: str = '',
-        **kargs: Any) -> namedtuple:
+        echo: bool = False,
+        quiet: bool = False) -> None:
     """
-    Run a shell or subprocess command and capture output.
+    Run a subprocess command safely (shell=False).
 
     Parameters
     ----------
-    cmd : list[str] | str
-        Command to run.
+    cmds : list[str]
+        Command and arguments to run (e.g. ['ls', '-l'])
 
-    shell : bool, default True
-        If True, run the command via the shell.
+    err_msg : str
+        Extra message to append if command fails.
 
-    quiet : bool, default False
-        If True, do not print stdout.
+    echo : bool
+        If True, prints the command being run.
 
-    echo : bool, default False
-        If True, print the command being executed.
-
-    bufsize : int, default 0
-        Buffer size passed to subprocess.Popen.
-
-    err_msg : str, default ''
-        Extra message to include if the command fails.
-
-    **kargs : Any
-        Passed to subprocess.Popen.
-
-    Returns
-    -------
-    Result
-        Named tuple with fields: cmd, stdout, stderr, rc (return code).
+    quiet : bool
+        If True, suppresses stdout on success.
     """
-    Result = namedtuple('Result', ['cmd', 'stdout', 'stderr', 'rc'])
-
-    cmd_list = cmd if isinstance(cmd, list) else shlex.split(cmd)
-    cmd_str = ' '.join(cmd_list) if shell else cmd_list
+    if not isinstance(cmds, (list, tuple)):
+        raise TypeError(
+                f"`cmds` must be a list or tuple of strings, got: {type(cmds)}")
 
     if echo:
-        print(f"Running: {cmd_str}")
+        print(f"Running: {' '.join(cmds)}")
 
-    proc = subprocess.Popen(
-        cmd_str,
-        shell=shell,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-        bufsize=bufsize,
-        **kargs,
+    r = subprocess.run(
+        cmds,
+        shell=False,
+        capture_output=True,
+        text=True,
+        check=False,
     )
-    out, err = proc.communicate()
-    rc = proc.returncode
 
-    out_str = out.decode('utf-8') if out else ''
-    err_str = err.decode('utf-8') if err else ''
-
-    if not quiet and out_str:
-        print(out_str)
-
-    if rc != 0:
-        msg = f"Command failed [{rc}]: {cmd_str}"
+    if r.returncode != 0:
+        msg = r.stderr.strip()
         if err_msg:
-            msg += f"\n{err_msg}"
-        msg += f"\n{err_str.strip()}"
+            msg = f"{err_msg}\n{msg}"
         raise RuntimeError(msg)
 
-    return Result(cmd=cmd_str, stdout=out_str.splitlines(),
-                  stderr=err_str.splitlines(), rc=rc)
-
+    if not quiet and r.stdout:
+        print(r.stdout, end='')
 
 
 def create_venv(
@@ -223,21 +194,18 @@ def create_venv(
 
 
 
-
-
-
 def mk_venv_opts() -> SimpleNamespace:
     """
     """
     venv_dir = PROJECT_ROOT.joinpath('.venv')
     venv_bin = venv_dir.joinpath('bin' if POSIX else 'Scripts')
-    pip_exec = venv_bin.joinpath('pip')
-    pyexec = venv_bin.joinpath('python' if POSIX else 'python.exe')
+    # possible executable names (in order or priority)
+    _pips = ['pip', 'pip3', 'pip.exe', 'pip3.exe']
+    pips = [venv_bin.joinpath(x) for x in _pips]
     return SimpleNamespace(
             root=venv_dir,
             bin=venv_bin,
-            pip=pip_exec,
-            pyexec=pyexec,
+            pips=pips,
             )
 
 class Setup:
@@ -256,6 +224,17 @@ class Setup:
         """
         with open(CONFIG_TOML, "rb") as f:
             return tomllib.load(f)
+
+
+    def get_pip(self) -> pathlib.Path | None:
+        """
+        Returns an existing pip executable (None if 
+        no executable can be found
+        """
+        for p in self.venv.pips:
+            if p.exists() and p.is_file():
+                return p
+
 
     def setup_venv(self, force: bool = False):
         """
@@ -276,12 +255,15 @@ class Setup:
         Install `tk_utils_core` into the virtual environment.
         If `force_reinstall` is True, reinstallation is forced.
         """
-        if not self.venv.pip.exists():
+        pipexec = self.get_pip() # -> pathlib.Path | None
+        if pipexec is None or not pipexec.exists():
             raise FileNotFoundError("Cannot find pip executable inside venv")
-
-        opts = "--force-reinstall" if force_reinstall else ""
         tgt = self.tk_utils_core_url
-        run(f"{self.venv.pip} install {opts} git+{tgt}")
+        cmd = [str(pipexec), "install"]
+        if force_reinstall:
+            cmd.append("--force-reinstall")
+        cmd.append(f"git+{tgt}")
+        run(cmd)
 
 
     def update_tk_utils_core(self):
