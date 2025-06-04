@@ -43,6 +43,13 @@ CONFIG_TOML = THIS_DIR.joinpath('config.toml')
 POSIX = os.name == 'posix'
 
 
+RETRY_MSG = (
+            "To resolve this issue:\n"
+            "  1. Restart PyCharm\n"
+            "  2. If the problem persists, try running this script with"
+            " the --force flag:\n"
+            "     python tk_utils/setup.py --force"
+            )
 
 def _mk_dirtree(
         init_note: str = '',
@@ -168,6 +175,7 @@ def create_venv(
         print(f"Virtual environment already active: {env_dir}")
         return False
 
+
     pyvenv_cfg = env_dir / "pyvenv.cfg"
     if env_dir.exists():
         if force and env_dir.name == '.venv':
@@ -176,19 +184,11 @@ def create_venv(
         elif pyvenv_cfg.exists():
             raise FileExistsError(
                 f"Directory '{env_dir}' contains a venv but it is not active.\n"
-                "To resolve this issue:\n"
-                "  1. Restart PyCharm\n"
-                "  2. If the problem persists, try running this script with --force:\n"
-                "     python tk_utils/setup.py --force"
-            )
+                + RETRY_MSG)
         else:
             raise FileExistsError(
                 f"Directory '{env_dir}' exists but does not contain a venv.\n"
-                "To resolve this issue:\n"
-                "  1. Restart PyCharm\n"
-                "  2. If the problem persists, try running this script with --force:\n"
-                "     python tk_utils/setup.py --force"
-            )
+                + RETRY_MSG)
 
     print(f"Creating virtual environment at {env_dir}")
     run(
