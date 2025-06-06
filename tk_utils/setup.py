@@ -260,7 +260,10 @@ class Setup:
         info = self.config['github']['tk_utils_core']
         return f"https://github.com/{info['user']}/{info['repo']}.git"
 
-    def install_tk_utils_core(self, force_reinstall: bool = True):
+    def install_tk_utils_core(
+            self, 
+            force_reinstall: bool = True,
+            branch: str | None = None):
         """
         Install `tk_utils_core` into the virtual environment.
         If `force_reinstall` is True, reinstallation is forced.
@@ -269,6 +272,9 @@ class Setup:
         if pipexec is None or not pipexec.exists():
             raise FileNotFoundError("Cannot find pip executable inside venv")
         tgt = self.tk_utils_core_url
+        if branch: 
+            tgt = f"{tgt}@{branch}"
+
         cmd = [str(pipexec), "install"]
         if force_reinstall:
             cmd.append("--force-reinstall")
@@ -283,6 +289,8 @@ class Setup:
         self.install_tk_utils_core(force_reinstall=True)
 
 
+
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description="Setup the virtual environment and install tk_utils_core."
@@ -292,9 +300,12 @@ def parse_args() -> argparse.Namespace:
         action='store_true',
         help='Force setup even if a venv already exists but is not active.'
     )
+    parser.add_argument(
+        '--branch',
+        type=str,
+        help='Specify the git branch to use.'
+    )
     return parser.parse_args()
-
-
 
 
 def main():
@@ -306,7 +317,7 @@ def main():
     check_locs()
     s = Setup()
     s.setup_venv(force=args.force)
-    s.install_tk_utils_core()
+    s.install_tk_utils_core(branch=args.branch)
 
     print('--------------------------------')
     print('PLEASE RESTART PYCHARM NOW')
