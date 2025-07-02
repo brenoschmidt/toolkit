@@ -41,8 +41,6 @@ THIS_DIR = THIS_FILE.parent
 PROJECT_ROOT = THIS_DIR.parent
 CONFIG_TOML = THIS_DIR.joinpath('config.toml')
 POSIX = os.name == 'posix'
-
-
 RETRY_MSG = (
             "To resolve this issue:\n"
             "  1. Restart PyCharm\n"
@@ -65,17 +63,14 @@ def _mk_dirtree(
     |   |__ {THIS_FILE.name}      {setup_note}
     ''')
 
-
 def _as_path(pth: str | pathlib.Path) -> pathlib.Path:
     return pth if isinstance(pth, pathlib.Path) else pathlib.Path(pth)
-
 
 def has_idea_folder(pth: pathlib.Path) -> bool:
     """
     True if the folder `pth` has a .idea sub-folder.
     """
     return pth.is_dir() and pth.joinpath('.idea').is_dir()
-
 
 def check_locs():
     """
@@ -97,7 +92,6 @@ def check_locs():
                         config_note='<- Missing file'),
         ]
         raise FileNotFoundError('\n'.join(err))
-
 
 def run(
         cmds: Sequence[str],
@@ -145,7 +139,6 @@ def run(
     if not quiet and r.stdout:
         print(r.stdout, end='')
 
-
 def create_venv(
         env_dir: str | pathlib.Path,
         force: bool = False) -> bool:
@@ -175,7 +168,6 @@ def create_venv(
         print(f"Virtual environment already active: {env_dir}")
         return False
 
-
     pyvenv_cfg = env_dir / "pyvenv.cfg"
     if env_dir.exists():
         if force and env_dir.name == '.venv':
@@ -198,8 +190,6 @@ def create_venv(
 
     print(f"Virtual environment created: {env_dir}")
     return True
-
-
 
 def mk_venv_opts() -> SimpleNamespace:
     """
@@ -227,14 +217,12 @@ class Setup:
         self.config = self.mk_config()
         self.venv = mk_venv_opts()
 
-
     def mk_config(self) -> dict[str, Any]:
         """
         Load the configuration from `config.toml`.
         """
         with open(CONFIG_TOML, "rb") as f:
             return tomllib.load(f)
-
 
     def get_pip(self) -> pathlib.Path | None:
         """
@@ -244,7 +232,6 @@ class Setup:
         for p in self.venv.pips:
             if p.exists() and p.is_file():
                 return p
-
 
     def setup_venv(self, force: bool = False):
         """
@@ -281,14 +268,11 @@ class Setup:
         cmd.append(f"git+{tgt}")
         run(cmd)
 
-
     def update_tk_utils_core(self):
         """
         Force reinstall of `tk_utils_core`.
         """
         self.install_tk_utils_core(force_reinstall=True)
-
-
 
 
 def parse_args() -> argparse.Namespace:
