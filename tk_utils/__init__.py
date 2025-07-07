@@ -28,7 +28,7 @@ from tk_utils_core import (
         webtools,
         )
 
-
+__version__ = "0.2.1"
 __all__ = [
         'backup',
         'converters',
@@ -64,11 +64,16 @@ if options.pycharm.validate_paths is True:
     _tkpaths.validate_tk_utils_init()
     _tkpaths.validate_venv()
 
-# Localize
+# ----------------------------------------------------------------------------
+#   Localize 
+# ----------------------------------------------------------------------------
 sync_dbox = _sysutils.sync_dbox
 copy_new_files = _sysutils.copy_new_files
 backup = _sysutils.backup
 update = _sysutils.update_tk_utils
+
+# Decorators
+describe = decorators.describe
 
 
 
