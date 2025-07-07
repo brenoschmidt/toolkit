@@ -44,6 +44,7 @@ __all__ = [
         'update',
         'validators',
         'webtools',
+        'describe',
         ]
 
 THIS_FILE = pathlib.Path(__file__)
