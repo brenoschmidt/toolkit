@@ -76,6 +76,12 @@ update = _sysutils.update_tk_utils
 # Decorators
 describe = decorators.describe
 
-
-
+# ----------------------------------------------------------------------------
+# Add the docstring of the Options class to help(tk_utils)
+# ----------------------------------------------------------------------------
+__doc__ +=  (
+    "\n"
+    + f"options: {options.__class__.__name__}\n" 
+    + options.__class__.__doc__
+    )
 
