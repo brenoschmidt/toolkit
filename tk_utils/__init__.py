@@ -28,7 +28,7 @@ from tk_utils_core import (
         webtools,
         )
 
-__version__ = "0.2.1"
+__version__ = "0.2.4"
 __all__ = [
         'backup',
         'converters',
